@@ -37,6 +37,7 @@ dependencies:
   http: ^0.12.2
   number_inc_dec: ^0.8.0
   cool_alert: ^1.1.0
+  carousel_slider: ^4.0.0
 
 dev_dependencies:
   flutter_test:
