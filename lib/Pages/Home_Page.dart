@@ -1,177 +1,214 @@
-// ignore: file_names
-// ignore_for_file: unused_import, file_names, duplicate_ignore, unused_element, prefer_const_constructors, unnecessary_new
-import 'dart:convert';
-import 'package:number_inc_dec/number_inc_dec.dart';
+import 'package:carousel_pro/carousel_pro.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:ratemyfood/Pages/Model.dart';
-import 'package:ratemyfood/Pages/Network.dart';
-import 'package:cool_alert/cool_alert.dart';
+import 'dart:convert'; // for using json.decode()
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      // Hide the debug banner
+      debugShowCheckedModeBanner: false,
+      title: 'Kindacode.com',
+      home: HomePage(),
+    );
+  }
+}
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key key}) : super(key: key);
-
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Product> productData = List();
+  // The list that contains information about photos
+  List _wsj = [];
+  List _techcrunch = [];
+  List _business = [];
 
-  @override
-  void initState() {
-    super.initState();
-    NetworkRequest.fetchProducts().then(
-      (dataFromServer) {
-        setState(() {
-          productData = dataFromServer;
-        });
-      },
-    );
+  // The function that fetches data from the API
+  Future<void> _fetchData() async {
+    const API_URL =
+        'https://newsapi.org/v2/everything?domains=wsj.com&apiKey=8f308063952e4028aba1dcc0f256ff77';
+
+    final response = await http.get(Uri.parse(API_URL));
+    Map<String, dynamic> map = json.decode(response.body);
+    List<dynamic> data = map["articles"];
+    setState(() {
+      _wsj = data;
+    });
+  }
+
+  Future<void> _fetchData1() async {
+    const API_URL =
+        'https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=8f308063952e4028aba1dcc0f256ff77';
+
+    final response = await http.get(Uri.parse(API_URL));
+    Map<String, dynamic> map = json.decode(response.body);
+    List<dynamic> data = map["articles"];
+    setState(() {
+      _techcrunch = data;
+    });
+  }
+
+  Future<void> _fetchData2() async {
+    const API_URL =
+        'https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=8f308063952e4028aba1dcc0f256ff77';
+
+    final response = await http.get(Uri.parse(API_URL));
+    Map<String, dynamic> map = json.decode(response.body);
+    List<dynamic> data = map["articles"];
+    setState(() {
+      _business = data;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Center(
-            child: Text(
-              'ratemyproducts.com',
-              style: TextStyle(
-                color: Colors.black,
-              ),
-            ),
-          ),
-          actions: <Widget>[
-            IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.shopping_cart_outlined, color: Colors.black)),
-          ],
+          title: Text('RATE MY NEWS'),
         ),
         body: Container(
-          color: Colors.grey[300],
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                    itemCount: productData.length,
-                    itemBuilder: (context, index) {
-                      return new Card(
-                        color: Colors.white,
-                        child: InkWell(
-                          onTap: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return new AlertDialog(
-                                    content: SingleChildScrollView(
-                                      child: Column(
-                                        children: [
-                                          Card(
-                                            child: Image.network(
-                                              productData[index].image,
-                                              width: 100,
-                                            ),
-                                          ),
-                                          Card(
-                                            child: Text(
-                                              'Description: ${productData[index].description}',
-                                              style: TextStyle(),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          SizedBox(
-                                            width: 70,
-                                            height: 70,
-                                            child:
-                                                NumberInputWithIncrementDecrement(
-                                              controller:
-                                                  TextEditingController(),
-                                              min: 0,
-                                              max: 100,
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              CoolAlert.show(
-                                                context: context,
-                                                type: CoolAlertType.success,
-                                                text: "Buy successfull!",
-                                              );
-                                            },
-                                            child: Text("BUY"),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                });
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.all(10),
-                            child: SizedBox(
-                              width: 50,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${productData[index].id}. ${productData[index].title}',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                    ),
-                                  ),
-                                  Image.network(
-                                    productData[index].image,
-                                    width: 50,
-                                  ),
-                                  Text(
-                                    'Price: ${productData[index].price}\$',
-                                    style: TextStyle(
-                                      color: Colors.green,
-                                      fontSize: 20,
-                                    ),
-                                  ),
-                                  RichText(
-                                    text: TextSpan(
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 17.0,
-                                      ),
-                                      text:
-                                          'Rate:${productData[index].rating.rate}',
-                                      children: <TextSpan>[
-                                        TextSpan(
-                                          text: String.fromCharCode(0xecf5),
-                                          style: TextStyle(
-                                            fontFamily: 'MaterialIcons',
-                                            fontSize: 15.0,
-                                            color: Colors.yellow[700],
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    'Count :${productData[index].rating.count}',
-                                    style: TextStyle(color: Colors.blue),
-                                  ),
-                                ],
+          height: 10000.0,
+          child: SafeArea(
+              child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                    height: 10000.0,
+                    child: Center(
+                        child: Carousel(
+                      images: [
+                        //slide 1
+                        Column(
+                          children: [
+                            GestureDetector(
+                              onTap: () {}, // handle your image tap here
+                              child: Image.asset(
+                                'img/img1.jpg',
+                                fit: BoxFit
+                                    .cover, // this is the solution for border
+                                width: 110.0,
+                                height: 110.0,
                               ),
                             ),
-                          ),
+                            ElevatedButton(
+                              child: Text('SHOW'),
+                              onPressed: _fetchData,
+                            ),
+                            SingleChildScrollView(
+                              child: Container(
+                                  height: 1000.0,
+                                  child: ListView.builder(
+                                    itemCount: _wsj.length,
+                                    itemBuilder: (BuildContext ctx, index) {
+                                      return ListTile(
+                                        leading: Image.network(
+                                          _wsj[index]["urlToImage"],
+                                          width: 150,
+                                          fit: BoxFit.cover,
+                                        ),
+                                        title: Text(_wsj[index]['title']),
+                                        subtitle: Text(
+                                            'NEWS ID: ${_wsj[index]["id"]}'),
+                                      );
+                                    },
+                                  )),
+                            ),
+                          ],
                         ),
-                      );
-                    }),
-              ),
-            ],
-          ),
+
+                        //slide 2
+                        Column(
+                          children: [
+                            GestureDetector(
+                              onTap: () {}, // handle your image tap here
+                              child: Image.asset(
+                                'img/img2.jpg',
+                                fit: BoxFit
+                                    .cover, // this is the solution for border
+                                width: 110.0,
+                                height: 110.0,
+                              ),
+                            ),
+                            ElevatedButton(
+                              child: Text('SHOW'),
+                              onPressed: _fetchData1,
+                            ),
+                            SingleChildScrollView(
+                              child: Container(
+                                  height: 1000.0,
+                                  child: ListView.builder(
+                                    itemCount: _techcrunch.length,
+                                    itemBuilder: (BuildContext ctx, index) {
+                                      return ListTile(
+                                        leading: Image.network(
+                                          _techcrunch[index]["urlToImage"],
+                                          width: 150,
+                                          fit: BoxFit.cover,
+                                        ),
+                                        title:
+                                            Text(_techcrunch[index]['title']),
+                                        subtitle: Text(
+                                            'NEWS ID: ${_techcrunch[index]["id"]}'),
+                                      );
+                                    },
+                                  )),
+                            ),
+                          ],
+                        ),
+
+                        //slide 3
+                        Column(
+                          children: [
+                            GestureDetector(
+                              onTap: () {}, // handle your image tap here
+                              child: Image.asset(
+                                'img/img3.jpg',
+                                fit: BoxFit
+                                    .cover, // this is the solution for border
+                                width: 110.0,
+                                height: 110.0,
+                              ),
+                            ),
+                            ElevatedButton(
+                              child: Text('SHOW'),
+                              onPressed: _fetchData2,
+                            ),
+                            SingleChildScrollView(
+                              child: Container(
+                                  height: 1000.0,
+                                  child: ListView.builder(
+                                    itemCount: _business.length,
+                                    itemBuilder: (BuildContext ctx, index) {
+                                      return ListTile(
+                                        leading: Image.network(
+                                          _business[index]["urlToImage"],
+                                          width: 150,
+                                          fit: BoxFit.cover,
+                                        ),
+                                        title: Text(_business[index]['title']),
+                                        subtitle: Text(
+                                            'NEWS ID: ${_business[index]["id"]}'),
+                                      );
+                                    },
+                                  )),
+                            ),
+                          ],
+                        ),
+                      ],
+                      autoplay: false,
+                    ))),
+              ],
+            ),
+          )),
         ));
+
+    // The ListView that displays photos
   }
 }
